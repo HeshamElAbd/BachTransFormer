@@ -3,13 +3,14 @@
 """
 Created on Fri Nov  1 21:19:49 2019
 @author: Hesham El Abd
-@Description: The scripts loads the processed midi corpa, numerically encode it
+@Description: The scripts loads the processed midi corpus, numerically encode it
 and train a Transformer encoder on it. 
 """
 # import modules:
 import tensorflow as tf
 import numpy as np
 import pickle
+from Models import EncoderModels
 # define some global parameters:
 batchSize=256
 lengthOfcondString=90
@@ -49,6 +50,38 @@ def mapTrainingTensor(batch):
     output_=batch[1:]
     return inputs,output_
 dataSet=dataSet.map(mapTrainingTensor).shuffle(1000).batch(batchSize)
+## define the model
+bachModeler=EncoderModels.Modeler(embedding_dim=64,
+                            vocabulary_size=len(uniqueMusicalElements)+1,
+                            conditional_string_length=lengthOfcondString,
+                            num_encoder_layer=8,
+                            num_heads=4,
+                            num_neuron_pointwise=256,
+                            rate=0.1,
+                            return_attent_weights=True)
+## define the loss and optimizer
+lossFunc=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+optimizer=tf.keras.optimizers.Adam()
+## define an accuracy metrics
+accuracy=tf.keras.metrics.CategoricalAccuracy()
+## define training step function:
+@tf.function()
+def trainStep(inputTensor,targetTensor):
+    """
+    Train the model on a batch of data and return its output
+    """
+    with tf.GradientTape() as tape:
+        predictions=bachModeler(inputTensor,True)
+        loss=lossFunc(y_true=targetTensor,y_pred=predictions)
+    grads=tape.gradient(loss,bachModeler.trainable_variables)
+    optimizer.apply_gradients(zip(grads,bachModeler.trainable_variables))
+    accuracy(y_true=tf.one_hot(targetTensor,depth=len(uniqueMusicalElements)+1),
+             y_pred=predictions)
+    
+
+
+
+
 
 
 
