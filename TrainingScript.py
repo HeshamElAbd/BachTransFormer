@@ -64,8 +64,12 @@ lossFunc=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer=tf.keras.optimizers.Adam()
 ## define an accuracy metrics
 accuracy=tf.keras.metrics.CategoricalAccuracy()
+# define an input signature:
+inputSignature=[
+        tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32),
+        tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32)]
 ## define training step function:
-@tf.function()
+@tf.function(input_signature=inputSignature)
 def trainStep(inputTensor,targetTensor):
     """
     Train the model on a batch of data and return its output
@@ -78,6 +82,26 @@ def trainStep(inputTensor,targetTensor):
     accuracy(y_true=tf.one_hot(targetTensor,depth=len(uniqueMusicalElements)+1),
              y_pred=predictions)
     
+inputSignatureTwo=[
+        tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32)]
+@tf.function(input_signature=inputSignatureTwo)
+def getAttentionWeights(inputTensor): 
+    """
+    The function return the self-attention weights of each layer in the Encoder
+    part of the model for the given input Tensor
+    ## inputs:
+    # inputTensor: a 2D Tensor of shape (BatchSize,lengthOfcondString)
+    ## outputs:
+    # attentionWeights: a list of length num_encoder_layer where each element
+    inside the list is a 4D tensor with 
+    shape(batchSize,numOfHeads,seqLength,seqLength)
+    """
+    _, attentionWeights=bachModeler(inputTensor,False)
+    for layerAttention in attentionWeights:
+        assert len(layerAttention.shape)==4, """ Something went wrong during the
+        calculations, the expected ranke of the tensor should be 4 however
+        the current rank is {}""".format(len(layerAttention.shape))
+    return attentionWeights
 
 
 
