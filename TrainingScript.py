@@ -36,7 +36,8 @@ with open("music2Int.pickle","wb") as output_:
 with open("int2music.pickle","wb") as output_:
     pickle.dump(int2music,output_)
 # Encode bach corpa
-EncodedMusic=np.array([music2int[musicElement] for musicElement in dataSet])
+EncodedMusic=np.array([music2int[musicElement] for musicElement in dataSet],
+                      dtype=np.int32)
 # prepear a dataset from the EncodedMusic
 dataSet=tf.data.Dataset.from_tensor_slices(EncodedMusic).batch(
         batch_size=lengthOfcondString+1,drop_remainder=True)
@@ -181,7 +182,7 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
     modelperformance=dict()
     if pathToSaveWeights[-1] != "/":
         pathToSaveWeights+="/"
-    for epoch in numOfEpoch:
+    for epoch in range(numOfEpoch):
         startTime=time.time()
         accuracy.reset_states()
         for (batch, (inputTensor, targetTensor)) in enumerate(dataSet):
