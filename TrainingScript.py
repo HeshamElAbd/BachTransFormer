@@ -84,6 +84,7 @@ def trainStep(inputTensor,targetTensor):
     
 inputSignatureTwo=[
         tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32)]
+
 @tf.function(input_signature=inputSignatureTwo)
 def getAttentionWeights(inputTensor): 
     """
@@ -102,6 +103,23 @@ def getAttentionWeights(inputTensor):
         calculations, the expected ranke of the tensor should be 4 however
         the current rank is {}""".format(len(layerAttention.shape))
     return attentionWeights
+
+# storing a batch to mointer the evolution of self-attention weights
+for batchToWatch,_ in dataSet.take(1): _
+
+
+def trainEpoch(numOfEpoch,pathToSaveWeights):
+    """
+    The function train the model for a numOfEpoch and saves the weights of the
+    model after each epoch at the pathToSaveWeights Path. After each epoch it
+    calls the function getAttentionWeights with a fixed batch of data to model 
+    how self-attention was evolving through training time.
+    calls  
+    ## inptus: 
+    # numOfEpochs: is the number of epochs to train the model
+    # pathToSaveWeights.
+    ## ouputs:
+    """
 
 
 
