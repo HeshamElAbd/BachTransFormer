@@ -12,6 +12,7 @@ import numpy as np
 import pickle
 from Models import EncoderModels
 import time
+import os
 # define some global parameters:
 batchSize=256
 lengthOfcondString=90
@@ -176,6 +177,7 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
     # SelfAttentionDict: is a dictionary of the self-attention weights of each layer 
     on a specific 2D input tensor accross different training epoch.
     """
+    trainingStartTime=time.time()
     modelperformance=dict()
     if pathToSaveWeights[-1] != "/":
         pathToSaveWeights+="/"
@@ -207,12 +209,20 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
         
     with open(pathToSaveWeights+"selfAttentionDict.pickle","wb") as output_:
         pickle.dump(SelfAttentionDict,output_)
-        
-    return SelfAttentionDict
-
+    
+    with open(pathToSaveWeights+"performanceMetrics.pickle","wb") as output_:
+        pickle.dump(modelperformance,output_)
+    
+    trainingEndTime=time.time()
+    print("*********** End of Training ************** ")
+    print("Total training time {} ".format(trainingEndTime-trainingStartTime))
+    return modelperformance, SelfAttentionDict
 # construct the training loop:
+os.makedirs("traingLogs",exist_ok=True)
 buitldModel(batchToWatch)        
-selfAttentiondatabase
+selfAttentiondatabase=dict()
+selfAttentiondatabase=updateSelfAttentionDict(selfAttentiondatabase,-1)
+modelPerf,selfattention=trainEpoch(100,"traingLogs",selfAttentiondatabase)
 
 
 
