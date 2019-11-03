@@ -64,6 +64,7 @@ lossFunc=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer=tf.keras.optimizers.Adam()
 ## define an accuracy metrics
 accuracy=tf.keras.metrics.CategoricalAccuracy()
+ModelLoss=tf.keras.metrics.SparseCategoricalCrossentropy()
 # define an input signature:
 inputSignature=[
         tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32),
@@ -81,6 +82,7 @@ def trainStep(inputTensor,targetTensor):
     optimizer.apply_gradients(zip(grads,bachModeler.trainable_variables))
     accuracy(y_true=tf.one_hot(targetTensor,depth=len(uniqueMusicalElements)+1),
              y_pred=predictions)
+    ModelLoss(y_true=targetTensor,y_pred=predictions)
     
 inputSignatureTwo=[
         tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32)]
@@ -155,9 +157,7 @@ def updateSelfAttentionDict(selfAttentionDict,epoch):
     selfAttentionDict[epoch]=getAttentionWeights(batchToWatch)
     return selfAttentionDict
     
-    
-    
-def trainEpoch(numOfEpoch,pathToSaveWeights):
+def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
     """
     The function train the model for a numOfEpoch and saves the weights of the
     model after each epoch at the pathToSaveWeights Path. After each epoch it
@@ -168,8 +168,14 @@ def trainEpoch(numOfEpoch,pathToSaveWeights):
     # numOfEpochs: is the number of epochs to train the model
     # pathToSaveWeights.
     ## ouputs:
+    # SelfAttentionDict: is a dictionary of the self-attention weights of each layer 
+    on a specific 2D input tensor accross different training epoch.
     """
-    
+    accuracy.reset_states()
+    for (batch, (inputTensor, targetTensor)) in enumerate(dataSet):
+        trainStep(inputTensor,targetTensor)
+        if batch % 10 ==0:
+            print("Epoch : {} \n states at batch {}: \n")
 
 
 
