@@ -190,8 +190,8 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
             if batch % 10 ==0:
                 print("Epoch : {} \n states at batch {}: \n".format(epoch,batch))
                 print("\t \t Loss: {} \t Accuracy: {}".format(
-                        modelLoss.results().numpy(),
-                        accuracy.results().numpy()
+                        modelLoss.result().numpy(),
+                        accuracy.result().numpy()
                         ))
                 
         SelfAttentionDict=updateSelfAttentionDict(SelfAttentionDict,epoch)
