@@ -107,7 +107,26 @@ def getAttentionWeights(inputTensor):
 # storing a batch to mointer the evolution of self-attention weights
 for batchToWatch,_ in dataSet.take(1): _
 
+def buitldModel(dumBatch):
+    """
+    The function build the weights of the model by calling it on a batch of 
+    input data. 
+    ## input: 
+    #   dumBatch: a 2D tensor of shape(None, lengthOfcondString) to be fed 
+    to the model.
+    """
+    assert len(batchToWatch.shape)==2,""" your tensor should have a rank 2, 
+    however, your input has ranke {}""".format(len(batchToWatch.shape))
+    assert batchToWatch.shape[1]==lengthOfcondString,""" the second dimension of
+    your input tensor should have a length of {}, however, your input tensor have
+    a dimension of {}""".format(lengthOfcondString,batchToWatch.shape[1])
+    _,_=bachModeler(dumBatch,False)
+    print("your Model has been build")
+    print("The models summary: ")
+    bachModeler.summary()
+    return 
 
+    
 def trainEpoch(numOfEpoch,pathToSaveWeights):
     """
     The function train the model for a numOfEpoch and saves the weights of the
