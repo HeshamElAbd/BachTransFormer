@@ -126,6 +126,36 @@ def buitldModel(dumBatch):
     bachModeler.summary()
     return 
 
+def updateSelfAttentionDict(selfAttentionDict,epoch):
+    """
+    The function update a dictionary database of the self-Attention weights of 
+    a specific random selection of musical notes accross different training 
+    cycles.
+    
+    ## input:
+    # selfAttenionDict: a dict with the epoch number as key and a list of
+    self-attention weights as a value.
+    
+    # epoch: an int which define the epoch number, the special value -1 is 
+    preserved for the self-attention weight before training starts, i.e. after
+    initialiazation
+    
+    ## output:
+    # selfAttentionDict: the same structure as the input dict but with the 
+    performance of the model after an x epoch added to it.
+    """
+    assert isinstance(selfAttentionDict,dict), """ Your input should be a dict,
+    however, your input has a type {}""".format(type(selfAttentionDict))
+    assert epoch not in selfAttentionDict.keys(), """ Indexing error, you are 
+    trying to add the performance which is already there !!. doing so might 
+    override old value and change your indexing. The current database has data 
+    for the following epochs: {} and your are trying to update epoch""".format(
+    sorted(selfAttentionDict.keys()),epoch)
+    
+    selfAttentionDict[epoch]=getAttentionWeights(batchToWatch)
+    return selfAttentionDict
+    
+    
     
 def trainEpoch(numOfEpoch,pathToSaveWeights):
     """
@@ -139,7 +169,7 @@ def trainEpoch(numOfEpoch,pathToSaveWeights):
     # pathToSaveWeights.
     ## ouputs:
     """
-
+    
 
 
 
