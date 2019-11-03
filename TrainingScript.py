@@ -169,9 +169,14 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
     # numOfEpochs: is the number of epochs to train the model
     # pathToSaveWeights.
     ## ouputs:
+    # modelPerformance: a dict object that stores the performance of a model on 
+    at the end of a specific epochs. the performance of the model is megered
+    using two metrics, the categorical crossentropy refered as "loss" and 
+    categoricalAccuracy refered to as "acc". 
     # SelfAttentionDict: is a dictionary of the self-attention weights of each layer 
     on a specific 2D input tensor accross different training epoch.
     """
+    modelperformance=dict()
     if pathToSaveWeights[-1] != "/":
         pathToSaveWeights+="/"
     for epoch in numOfEpoch:
@@ -185,12 +190,24 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
                         modelLoss.results().numpy(),
                         accuracy.results().numpy()
                         ))
+                
         SelfAttentionDict=updateSelfAttentionDict(SelfAttentionDict,epoch)
-        bachModeler.save_weights("pathToSaveWeights"+"ModelWeightsAt_"+
+        
+        bachModeler.save_weights(pathToSaveWeights+"ModelWeightsAt_"+
                                  str(epoch)+".h5")
+        
+        performDict={"loss":modelLoss.result().numpy(),
+                     "acc":accuracy.result().numpy()}
+        
+        modelperformance[epoch]=performDict
+        
         endTime=time.time()
         print("End of Epoch: {} \t Exection Time: {} \t average execution time per batch {}".format(
                 epoch,endTime-startTime,(endTime-startTime)/batch+1))
+        
+    with open(pathToSaveWeights+"selfAttentionDict.pickle","wb") as output_:
+        pickle.dump(SelfAttentionDict,output_)
+        
     return SelfAttentionDict
 
 # construct the training loop:
