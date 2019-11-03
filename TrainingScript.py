@@ -191,10 +191,11 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
         endTime=time.time()
         print("End of Epoch: {} \t Exection Time: {} \t average execution time per batch {}".format(
                 epoch,endTime-startTime,(endTime-startTime)/batch+1))
-        return SelfAttentionDict
-    
-        
-       
+    return SelfAttentionDict
+
+# construct the training loop:
+buitldModel(batchToWatch)        
+selfAttentiondatabase
 
 
 
