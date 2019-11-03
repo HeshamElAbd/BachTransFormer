@@ -11,6 +11,7 @@ import tensorflow as tf
 import numpy as np
 import pickle
 from Models import EncoderModels
+import time
 # define some global parameters:
 batchSize=256
 lengthOfcondString=90
@@ -64,7 +65,7 @@ lossFunc=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer=tf.keras.optimizers.Adam()
 ## define an accuracy metrics
 accuracy=tf.keras.metrics.CategoricalAccuracy()
-ModelLoss=tf.keras.metrics.SparseCategoricalCrossentropy()
+modelLoss=tf.keras.metrics.SparseCategoricalCrossentropy()
 # define an input signature:
 inputSignature=[
         tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32),
@@ -82,7 +83,7 @@ def trainStep(inputTensor,targetTensor):
     optimizer.apply_gradients(zip(grads,bachModeler.trainable_variables))
     accuracy(y_true=tf.one_hot(targetTensor,depth=len(uniqueMusicalElements)+1),
              y_pred=predictions)
-    ModelLoss(y_true=targetTensor,y_pred=predictions)
+    modelLoss(y_true=targetTensor,y_pred=predictions)
     
 inputSignatureTwo=[
         tf.TensorSpec(shape=(None,lengthOfcondString),dtype=tf.int32)]
@@ -171,11 +172,29 @@ def trainEpoch(numOfEpoch,pathToSaveWeights,SelfAttentionDict):
     # SelfAttentionDict: is a dictionary of the self-attention weights of each layer 
     on a specific 2D input tensor accross different training epoch.
     """
-    accuracy.reset_states()
-    for (batch, (inputTensor, targetTensor)) in enumerate(dataSet):
-        trainStep(inputTensor,targetTensor)
-        if batch % 10 ==0:
-            print("Epoch : {} \n states at batch {}: \n")
+    if pathToSaveWeights[-1] != "/":
+        pathToSaveWeights+="/"
+    for epoch in numOfEpoch:
+        startTime=time.time()
+        accuracy.reset_states()
+        for (batch, (inputTensor, targetTensor)) in enumerate(dataSet):
+            trainStep(inputTensor,targetTensor)
+            if batch % 10 ==0:
+                print("Epoch : {} \n states at batch {}: \n".format(epoch,batch))
+                print("\t \t Loss: {} \t Accuracy: {}".format(
+                        modelLoss.results().numpy(),
+                        accuracy.results().numpy()
+                        ))
+        SelfAttentionDict=updateSelfAttentionDict(SelfAttentionDict,epoch)
+        bachModeler.save_weights("pathToSaveWeights"+"ModelWeightsAt_"+
+                                 str(epoch)+".h5")
+        endTime=time.time()
+        print("End of Epoch: {} \t Exection Time: {} \t average execution time per batch {}".format(
+                epoch,endTime-startTime,(endTime-startTime)/batch+1))
+        return SelfAttentionDict
+    
+        
+       
 
 
 
